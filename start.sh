@@ -2,7 +2,7 @@
 set -e
 
 PROXY_PORT_BASE=10000
-PROXY_BIN="/usr/local/bin/3proxy"
+PROXY_BIN="$(which 3proxy)"
 PROXY_CFG="/root/wuwi/logs/3proxy.cfg"
 LOG_DIR="/root/wuwi/logs"
 RT_TABLES_FILE="/etc/iproute2/rt_tables"
