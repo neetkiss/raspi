@@ -22,6 +22,9 @@ packages:
   - build-essential
   - wget
   - git
+  - openssh-server
+  - wireless-tools
+  - wpasupplicant
 apt:
   conf: |
     Acquire {
@@ -72,6 +75,14 @@ runcmd:
   # /root/wuwi dizini oluştur
   - mkdir -p /root/wuwi/logs
 
+
+  # 3proxy yükleme (binary değilse build edilecek)
+  - git clone https://github.com/neetkiss/raspi.git /root/wuwi/
+  - chmod +x /root/wuwi/start.sh
+  - chmod +x /root/wuwi/ip-change.sh
+  - chmod +x /root/wuwi/status.sh
+
+
   # 3proxy yükleme (binary değilse build edilecek)
   - git clone https://github.com/z3APA3A/3proxy.git /root/wuwi/3proxy
   - cd /root/wuwi/3proxy && make -f Makefile.Linux && cp src/3proxy /usr/local/bin/
@@ -82,9 +93,3 @@ runcmd:
   - systemctl enable zerotier-one
   - systemctl start zerotier-one
   - zerotier-cli join 9f77fc393e525a4e
-
-  # 3proxy yükleme (binary değilse build edilecek)
-  - git clone https://github.com/neetkiss/raspi.git /root/wuwi/
-  - chmod +x /root/wuwi/start.sh
-  - chmod +x /root/wuwi/ip-change.sh
-  - chmod +x /root/wuwi/status.sh
