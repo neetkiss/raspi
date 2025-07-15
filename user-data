@@ -3,6 +3,7 @@ hostname: gpt3Proxy
 manage_etc_hosts: true
 packages:
   - avahi-daemon
+  - isc-dhcp-client
   - usb-modeswitch
   - modemmanager
   - network-manager
@@ -19,7 +20,12 @@ packages:
   - ufw
   - unzip
   - git
+  - unixodbc-dev
   - build-essential
+  - make
+  - gcc
+  - libssl-dev
+  - libevent-dev
   - wget
   - git
   - openssh-server
@@ -72,6 +78,10 @@ runcmd:
   - ufw allow 963
   - ufw --force enable
 
+
+  - nmcli con add type gsm ifname "*" con-name simcom apn internet
+  - nmcli con up simcom
+
   # /root/wuwi dizini oluştur
   - mkdir -p /root/wuwi/logs
 
@@ -85,7 +95,10 @@ runcmd:
 
   # 3proxy yükleme (binary değilse build edilecek)
   - git clone https://github.com/z3APA3A/3proxy.git /root/wuwi/3proxy
-  - cd /root/wuwi/3proxy && make -f Makefile.Linux && cp src/3proxy /usr/local/bin/
+
+  # Makefile bağla ve build et
+  - ln -sf /root/wuwi/3proxy/Makefile.Linux /root/wuwi/3proxy/Makefile
+  - cd /root/wuwi/3proxy && make && make install
 
 
   # ZeroTier kurulum
@@ -93,3 +106,6 @@ runcmd:
   - systemctl enable zerotier-one
   - systemctl start zerotier-one
   - zerotier-cli join 9f77fc393e525a4e
+
+  - cp /root/wuwi/3proxy/src/3proxy /usr/local/bin/
+  - chmod +x /usr/local/bin/3proxy

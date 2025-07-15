@@ -5,6 +5,7 @@ PROXY_PORT_BASE=10000
 PROXY_BIN="/usr/local/bin/3proxy"
 PROXY_CFG="/root/wuwi/logs/3proxy.cfg"
 LOG_DIR="/root/wuwi/logs"
+RT_TABLES_FILE="/etc/iproute2/rt_tables"
 
 # Temiz başla
 mkdir -p "$LOG_DIR"
@@ -31,12 +32,23 @@ for IFACE in $MOBILE_IFACES; do
 
   PORT=$((PROXY_PORT_BASE++))
   RT_TABLE="rt_$IFACE"
-  echo "$((TABLE_ID++)) $RT_TABLE" >> /etc/iproute2/rt_tables 2>/dev/null || true
+
+  # rt_tables dosyasına ekle (varsa atla)
+  if ! grep -q "$RT_TABLE" "$RT_TABLES_FILE"; then
+    echo "$((TABLE_ID++)) $RT_TABLE" >> "$RT_TABLES_FILE"
+  fi
 
   echo "[INFO] $IFACE → $IP port $PORT olarak atanıyor."
 
-  # IP rule + routing
-  ip rule add from "$IP" table "$RT_TABLE" priority 1000
+  # Önce varsa eski kural ve route silinir
+  ip rule del from "$IP" table "$RT_TABLE" 2>/dev/null || true
+  ip route flush table "$RT_TABLE" 2>/dev/null || true
+
+  # Kural zaten yoksa ekle
+  if ! ip rule list | grep -q "from $IP.*table $RT_TABLE"; then
+    ip rule add from "$IP" table "$RT_TABLE" priority 1000
+  fi
+
   ip route add default dev "$IFACE" table "$RT_TABLE"
 
   # 3proxy konfigürasyon satırı ekle
