@@ -1,0 +1,90 @@
+#cloud-config
+hostname: gpt3Proxy
+manage_etc_hosts: true
+packages:
+  - avahi-daemon
+  - usb-modeswitch
+  - modemmanager
+  - network-manager
+  - udhcpc
+  - iproute2
+  - iputils-ping
+  - ppp
+  - jq
+  - curl
+  - socat
+  - net-tools
+  - dnsmasq
+  - screen
+  - ufw
+  - unzip
+  - git
+  - build-essential
+  - wget
+  - git
+apt:
+  conf: |
+    Acquire {
+      Check-Date "false";
+    };
+
+users:
+- name: neet
+  groups: users,adm,dialout,audio,netdev,video,plugdev,cdrom,games,input,gpio,spi,i2c,render,sudo
+  shell: /bin/bash
+  lock_passwd: false
+  passwd: $5$OhNPqiHVBo$AQ9kvYWlYXkho92HA6/eN4hyyz9yYYZZG9JbUfiWj57
+
+ssh_pwauth: true
+
+timezone: Europe/Istanbul
+keyboard:
+  model: pc105
+  layout: "tr
+"
+
+
+runcmd:
+  - ip link set wlan0 up
+  - ip link set wwu1i5 up
+  - dhclient wwu1i5
+  - systemctl enable ModemManager
+  - systemctl start ModemManager
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow in on zt+ to any port 10000:10100 proto tcp
+  - ufw allow in on zt+ to any port 9993 proto udp
+  - ufw allow 21
+  - ufw allow 22
+  - ufw allow 80
+  - ufw allow 443
+  - ufw allow 465
+  - ufw allow 587
+  - ufw allow 1080
+  - ufw allow 3128
+  - ufw allow 8080
+  - ufw allow 4441
+  - ufw allow 4341
+  - ufw allow 965
+  - ufw allow 963
+  - ufw --force enable
+
+  # /root/wuwi dizini oluştur
+  - mkdir -p /root/wuwi/logs
+
+  # 3proxy yükleme (binary değilse build edilecek)
+  - git clone https://github.com/z3APA3A/3proxy.git /root/wuwi/3proxy
+  - cd /root/wuwi/3proxy && make -f Makefile.Linux && cp src/3proxy /usr/local/bin/
+
+
+  # ZeroTier kurulum
+  - curl -s https://install.zerotier.com | bash
+  - systemctl enable zerotier-one
+  - systemctl start zerotier-one
+  - zerotier-cli join 9f77fc393e525a4e
+
+  # 3proxy yükleme (binary değilse build edilecek)
+  - git clone https://github.com/neetkiss/raspi.git /root/wuwi/
+  - chmod +x /root/wuwi/start.sh
+  - chmod +x /root/wuwi/ip-change.sh
+  - chmod +x /root/wuwi/status.sh
