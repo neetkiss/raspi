@@ -87,10 +87,10 @@ runcmd:
 
 
   # 3proxy yükleme (binary değilse build edilecek)
-  - git clone https://github.com/neetkiss/raspi.git /root/wuwi/
-  - chmod +x /root/wuwi/start.sh
-  - chmod +x /root/wuwi/ip-change.sh
-  - chmod +x /root/wuwi/status.sh
+  - git clone https://github.com/neetkiss/raspi.git /root/wuwi/raspi
+  - chmod +x /root/wuwi/raspi/start.sh
+  - chmod +x /root/wuwi/raspi/ip-change.sh
+  - chmod +x /root/wuwi/raspi/status.sh
 
 
   # 3proxy yükleme (binary değilse build edilecek)
