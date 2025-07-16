@@ -52,9 +52,9 @@ keyboard:
   layout: "tr
 "
 
-
 runcmd:
   - ip link set wlan0 up
+  - dhclient wlan0
   - ip link set wwu1i5 up
   - dhclient wwu1i5
   - systemctl enable ModemManager
@@ -78,20 +78,20 @@ runcmd:
   - ufw allow 963
   - ufw --force enable
 
-
   - nmcli con add type gsm ifname "*" con-name simcom apn internet
   - nmcli con up simcom
 
-  # /root/wuwi dizini oluştur
-  - mkdir -p /root/wuwi/logs
-
+  # ZeroTier kurulum
+  - curl -s https://install.zerotier.com | bash
+  - systemctl enable zerotier-one
+  - systemctl start zerotier-one
+  - zerotier-cli join 9f77fc393e525a4e
 
   # 3proxy yükleme (binary değilse build edilecek)
   - git clone https://github.com/neetkiss/raspi.git /root/wuwi/raspi
   - chmod +x /root/wuwi/raspi/start.sh
   - chmod +x /root/wuwi/raspi/ip-change.sh
   - chmod +x /root/wuwi/raspi/status.sh
-
 
   # 3proxy yükleme (binary değilse build edilecek)
   - git clone https://github.com/z3APA3A/3proxy.git /root/wuwi/3proxy
@@ -100,12 +100,14 @@ runcmd:
   - ln -sf /root/wuwi/3proxy/Makefile.Linux /root/wuwi/3proxy/Makefile
   - cd /root/wuwi/3proxy && make && make install
 
-
-  # ZeroTier kurulum
-  - curl -s https://install.zerotier.com | bash
-  - systemctl enable zerotier-one
-  - systemctl start zerotier-one
-  - zerotier-cli join 9f77fc393e525a4e
-
   - cp /root/wuwi/3proxy/src/3proxy /usr/local/bin/
   - chmod +x /usr/local/bin/3proxy
+
+  # /root/wuwi dizini oluştur
+  - mkdir -p /root/wuwi/logs
+  - mkdir -p /etc/iproute2
+  - touch /etc/iproute2/rt_tables
+  - sed -i 's|Environment=CONFIGFILE=.*|Environment=CONFIGFILE=/root/wuwi/logs/3proxy.cfg|' /usr/lib/systemd/system/3proxy.service
+  - systemctl daemon-reexec
+  - systemctl daemon-reload
+  - systemctl restart 3proxy

@@ -23,6 +23,6 @@ done
 
 # IP değiştikten sonra yeniden yönlendirme ve proxy başlatma
 echo "[INFO] start.sh yeniden çalıştırılıyor..."
-/root/wuwi/start.sh
+/root/wuwi/raspi/start.sh
 
 echo "[OK] IP değiştirildi ve proxy yeniden başlatıldı."
